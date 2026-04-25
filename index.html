@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프리미엄 무선 이어폰 - SoundMakers</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 기본 스타일 리셋 및 스크롤 동작 부드럽게 설정 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            /* 클릭 시 부드럽게 이동하는 효과 */
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* 1. 내비게이션 바 */
+        header {
+            background-color: #fff;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links li a:hover {
+            color: #007bff;
+        }
+
+        .lang-btn {
+            padding: 0.3rem 0.8rem;
+            background-color: #222;
+            color: #fff;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* 2. 히어로 섹션 */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5rem 5%;
+            background: linear-gradient(135deg, #ece9e6 0%, #ffffff 100%);
+            min-height: 80vh;
+        }
+
+        .hero-text {
+            flex: 1;
+            padding-right: 2rem;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: #111;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background-color: #007bff;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            transition: 0.3s;
+        }
+
+        .cta-btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .hero-image {
+            flex: 1;
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .hero-image img:hover {
+            transform: scale(1.02);
+        }
+
+        /* 3. 제품 특징 (기존과 동일) */
+        .features {
+            padding: 5rem 5%;
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .features h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card i {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: #666;
+        }
+
+        /* 4. 스토리 섹션 (새로 추가) */
+        .story {
+            padding: 5rem 5%;
+            text-align: center;
+            background-color: #f4f6f9;
+        }
+
+        .story h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .story p {
+            max-width: 800px;
+            margin: 0 auto;
+            color: #555;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        /* 5. 문의 섹션 (새로 추가) */
+        .contact {
+            padding: 5rem 5%;
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .contact h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact p {
+            margin-bottom: 2rem;
+            color: #666;
+        }
+
+        .contact-form {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        .contact-form button {
+            padding: 1rem;
+            background-color: #222;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .contact-form button:hover {
+            background-color: #007bff;
+        }
+
+        /* 푸터 */
+        footer {
+            background-color: #222;
+            color: #fff;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* 반응형 웹 */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 3rem;
+            }
+
+            .hero-text {
+                padding-right: 0;
+                margin-bottom: 3rem;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">SoundMakers</div>
+        <ul class="nav-links">
+            <li><a href="#home">홈페이지</a></li>
+            <li><a href="#product">제품</a></li>
+            <li><a href="#story">스토리</a></li>
+            <li><a href="#contact">문의</a></li>
+            <li><a href="index_en.html" class="lang-btn">ENG</a></li>
+        </ul>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="hero-text">
+            <h1>궁극의 몰입감,<br>새로운 소리의 기준</h1>
+            <p>스튜디오 수준의 음질과 완벽한 노이즈 캔슬링.<br>SoundMakers 무선 이어폰으로 일상을 음악으로 채우세요.</p>
+            <a href="#product" class="cta-btn">더 알아보기</a>
+        </div>
+        <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1000&auto=format&fit=crop"
+                alt="프리미엄 무선 노이즈 캔슬링 이어폰">
+        </div>
+    </section>
+
+    <section class="features" id="product">
+        <h2>왜 SoundMakers 인가요?</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="fa-solid fa-ear-listen"></i>
+                <h3>액티브 노이즈 캔슬링</h3>
+                <p>외부 소음을 완벽하게 차단하여 오직 음악과 당신만이 남는 완벽한 몰입을 경험하세요.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-battery-full"></i>
+                <h3>최대 40시간 연속 재생</h3>
+                <p>단 한 번의 충전으로 하루 종일 배터리 걱정 없이 좋아하는 음악을 즐길 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-feather"></i>
+                <h3>인체공학적 편안함</h3>
+                <p>귀에 부드럽게 밀착되는 디자인으로 오랜 시간 착용해도 피로감 없이 편안합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="story" id="story">
+        <h2>우리의 스토리</h2>
+        <p>SoundMakers는 '소리의 본질'에 집중하는 오디오 엔지니어들이 모여 시작되었습니다. 우리는 음악이 주는 감동을 왜곡 없이 온전히 전달하는 것을 최우선으로 생각합니다. 수천 번의 테스트와
+            디자인 수정을 거쳐 마침내 당신의 일상에 완벽하게 스며들 무선 이어폰을 완성했습니다.</p>
+    </section>
+
+    <section class="contact" id="contact">
+        <h2>문의하기</h2>
+        <p>제품에 대해 궁금한 점이 있으시다면 언제든 남겨주세요.</p>
+        <form class="contact-form" action="#" method="POST">
+            <input type="text" placeholder="이름" required>
+            <input type="email" placeholder="이메일 주소" required>
+            <textarea rows="5" placeholder="문의 내용을 입력해주세요." required></textarea>
+            <button type="submit">메시지 보내기</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 SoundMakers. All Rights Reserved.</p>
+    </footer>
+
+</body>
+
+</html>
