@@ -4,18 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundMakers | Headphones with Ultimate Immersion</title>
+    <title>IRIVER | Headphones with Ultimate Immersion</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 
     <style>
         :root {
-            --primary: #1d1d1f;
-            --secondary: #86868b;
-            --accent: #0071e3;
-            --bg-main: #ffffff;
-            --bg-sub: #f5f5f7;
+            /* Premium Dark Red & Silver Theme Colors */
+            --primary: #ffffff;
+            --secondary: #a1a1a6;
+            --accent: #c31432;
+            --accent-glow: rgba(195, 20, 50, 0.4);
+            --bg-main: #000000;
+            --bg-sub: #0a0a0c;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.05);
         }
 
         * {
@@ -30,6 +34,7 @@
             scroll-snap-type: y mandatory;
             scroll-padding-top: 60px;
             overflow-x: hidden;
+            background-color: var(--bg-main);
         }
 
         body {
@@ -43,33 +48,60 @@
         a {
             text-decoration: none;
             color: inherit;
-            transition: 0.2s ease;
+            transition: 0.3s ease;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+        /* Metallic Silver Text Gradient */
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #b3b3b3 50%, #7a7a7a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Dark Red to Light Red Accent Gradient */
+        .accent-gradient {
+            background: linear-gradient(135deg, #ff416c 0%, #c31432 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0px);
             }
         }
 
-        .animate {
-            animation: fadeInUp 1s ease forwards;
+        /* Scroll Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Glassmorphism Navbar */
         header {
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 9999;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--glass-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -78,9 +110,10 @@
         }
 
         .logo {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #fff;
         }
 
         .nav-links {
@@ -92,23 +125,28 @@
         }
 
         .nav-links li a:hover {
-            color: var(--accent);
+            color: #ff416c;
+            text-shadow: 0 0 10px var(--accent-glow);
         }
 
         .lang-btn {
             padding: 0.4rem 1rem;
-            background-color: var(--primary);
+            background-color: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             color: #fff;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
 
         .lang-btn:hover {
-            background-color: var(--secondary);
-            color: #fff;
+            background-color: #fff;
+            color: #000;
         }
 
+        /* Common Section Layout */
         section {
             min-height: 100vh;
             padding: 60px 5% 0 5%;
@@ -117,11 +155,12 @@
             justify-content: center;
             align-items: center;
             scroll-snap-align: start;
+            position: relative;
         }
 
         .section-title {
-            font-size: 3rem;
-            font-weight: 700;
+            font-size: 3.5rem;
+            font-weight: 800;
             letter-spacing: -1px;
             margin-bottom: 0.5rem;
             text-align: center;
@@ -131,13 +170,14 @@
             font-size: 1.2rem;
             color: var(--secondary);
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
             max-width: 700px;
             line-height: 1.6;
         }
 
+        /* Hero Section */
         .hero {
-            background: var(--bg-sub);
+            background: radial-gradient(circle at 80% 50%, rgba(195, 20, 50, 0.15), transparent 50%), var(--bg-main);
         }
 
         .hero-content {
@@ -155,55 +195,56 @@
         }
 
         .hero h1 {
-            font-size: 4.5rem;
+            font-size: 4.8rem;
             font-weight: 800;
             letter-spacing: -2px;
             line-height: 1.15;
             margin-bottom: 1.5rem;
-            color: var(--primary);
         }
 
         .hero p {
             font-size: 1.5rem;
             color: var(--secondary);
-            margin-bottom: 2.5rem;
-            font-weight: 500;
+            margin-bottom: 3rem;
+            font-weight: 400;
         }
 
         .cta-btn {
             display: inline-block;
             padding: 1.2rem 3rem;
-            background-color: var(--accent);
+            background: linear-gradient(135deg, #c31432, #ff416c);
             color: white;
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 700;
             border-radius: 30px;
-            transition: transform 0.3s, background 0.3s;
+            box-shadow: 0 10px 20px var(--accent-glow);
+            transition: all 0.3s ease;
         }
 
         .cta-btn:hover {
-            background-color: #005bb5;
-            transform: scale(1.05);
-            color: #fff;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(255, 65, 108, 0.4);
         }
 
         .hero-image {
             flex: 1;
             display: flex;
             justify-content: center;
+            animation: float 6s ease-in-out infinite;
         }
 
         .hero-image img {
             width: 100%;
             height: auto;
             border-radius: 20px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
             object-fit: cover;
             max-height: 65vh;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
         }
 
+        /* Features Section */
         .features {
-            background-color: var(--bg-main);
+            background-color: var(--bg-sub);
         }
 
         .feature-grid {
@@ -216,53 +257,50 @@
 
         .feature-card {
             text-align: center;
-            padding: 2.5rem 2rem;
-            background: var(--bg-sub);
+            padding: 3.5rem 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
-            transition: 0.4s;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
         }
 
         .feature-card:hover {
             transform: translateY(-10px);
-            background: #fff;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .feature-card i {
             font-size: 3.5rem;
-            color: var(--primary);
+            background: linear-gradient(135deg, #ff416c, #c31432);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 1.5rem;
         }
 
         .feature-card h3 {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
+            color: #fff;
         }
 
         .feature-card p {
             color: var(--secondary);
-            font-size: 1rem;
+            font-size: 1.05rem;
         }
 
+        /* Story Section */
         .story {
-            background-color: #000;
-            color: #fff;
-        }
-
-        .story .section-title {
-            color: #fff;
-        }
-
-        .story .section-desc {
-            color: #a1a1a6;
-            margin-bottom: 2.5rem;
+            background-color: var(--bg-main);
         }
 
         .story-content {
             display: flex;
             align-items: center;
-            gap: 4rem;
+            gap: 5rem;
             max-width: 1200px;
             width: 100%;
         }
@@ -273,47 +311,60 @@
         }
 
         .story-text p {
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             line-height: 1.8;
-            margin-bottom: 1.2rem;
-            color: #f5f5f7;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
             font-weight: 300;
         }
 
         .story-image {
             flex: 1;
+            position: relative;
+        }
+
+        .story-image::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background: var(--accent);
+            filter: blur(100px);
+            opacity: 0.25;
+            z-index: -1;
         }
 
         .story-image img {
             width: 100%;
             border-radius: 20px;
-            filter: brightness(0.9);
             object-fit: cover;
             max-height: 60vh;
+            border: 1px solid var(--glass-border);
         }
 
+        /* Specs Section */
         .specs {
-            background-color: var(--bg-sub);
-        }
-
-        .specs .section-desc {
-            margin-bottom: 2.5rem;
+            background: radial-gradient(circle at 20% 80%, rgba(195, 20, 50, 0.1), transparent 50%), var(--bg-sub);
         }
 
         .spec-list {
             max-width: 800px;
             width: 100%;
-            background: #fff;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 2rem 3rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            padding: 3rem;
+            backdrop-filter: blur(10px);
         }
 
         .spec-item {
             display: flex;
             justify-content: space-between;
-            padding: 1.2rem 0;
-            border-bottom: 1px solid #eee;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .spec-item:last-child {
@@ -321,24 +372,22 @@
         }
 
         .spec-title {
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 1.05rem;
+            font-weight: 500;
+            color: #fff;
+            font-size: 1.1rem;
         }
 
         .spec-value {
             color: var(--secondary);
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             text-align: right;
+            font-weight: 300;
         }
 
+        /* Contact Section */
         .contact {
             background-color: var(--bg-main);
             position: relative;
-        }
-
-        .contact .section-desc {
-            margin-bottom: 2.5rem;
         }
 
         .contact-form {
@@ -347,41 +396,50 @@
             display: flex;
             flex-direction: column;
             gap: 1.2rem;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
         }
 
         .contact-form input,
         .contact-form textarea {
             width: 100%;
-            padding: 1rem;
-            border: 1px solid #d2d2d7;
+            padding: 1.2rem;
+            border: 1px solid var(--glass-border);
             border-radius: 12px;
             font-size: 1rem;
-            background: var(--bg-sub);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
             transition: 0.3s;
+        }
+
+        .contact-form input::placeholder,
+        .contact-form textarea::placeholder {
+            color: #666;
         }
 
         .contact-form input:focus,
         .contact-form textarea:focus {
             outline: none;
             border-color: var(--accent);
-            background: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(195, 20, 50, 0.2);
         }
 
         .contact-form button {
-            padding: 1rem;
-            background-color: var(--primary);
-            color: #fff;
+            padding: 1.2rem;
+            background-color: #fff;
+            color: #000;
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            font-size: 1.05rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
             transition: 0.3s;
         }
 
         .contact-form button:hover {
             background-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 5px 15px var(--accent-glow);
         }
 
         footer {
@@ -389,15 +447,16 @@
             bottom: 0;
             width: 100%;
             text-align: center;
-            color: var(--secondary);
+            color: #666;
             font-size: 0.85rem;
-            padding: 1.5rem;
-            border-top: 1px solid #eee;
+            padding: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
+        /* Responsive Design */
         @media (max-width: 1024px) {
             .hero h1 {
-                font-size: 3.2rem;
+                font-size: 3.8rem;
             }
 
             .hero-content {
@@ -409,7 +468,7 @@
             }
 
             .story-content {
-                gap: 2rem;
+                gap: 3rem;
             }
         }
 
@@ -431,7 +490,7 @@
             .hero-content {
                 flex-direction: column;
                 text-align: center;
-                gap: 3rem;
+                gap: 2rem;
             }
 
             .hero-text {
@@ -439,7 +498,7 @@
             }
 
             .hero h1 {
-                font-size: 2.8rem;
+                font-size: 3rem;
             }
 
             .hero p {
@@ -447,7 +506,7 @@
             }
 
             .section-title {
-                font-size: 2.2rem;
+                font-size: 2.5rem;
             }
 
             .feature-grid {
@@ -457,7 +516,7 @@
 
             .story-content {
                 flex-direction: column;
-                gap: 2rem;
+                gap: 3rem;
                 text-align: center;
             }
 
@@ -465,15 +524,11 @@
                 text-align: center;
             }
 
-            .story-text p {
-                font-size: 1.05rem;
-            }
-
             .spec-item {
                 flex-direction: column;
                 text-align: center;
-                gap: 0.4rem;
-                padding: 1rem 0;
+                gap: 0.5rem;
+                padding: 1.2rem 0;
             }
 
             .spec-value {
@@ -501,36 +556,35 @@
         <a href="index.html" class="lang-btn">KR</a>
     </header>
 
-    <section class="hero animate" id="home">
+    <section class="hero" id="home">
         <div class="hero-content">
-            <div class="hero-text">
-                <h1>Ultimate Sound,<br>Start of Perfect Immersion</h1>
+            <div class="hero-text reveal">
+                <h1 class="text-gradient">Ultimate Sound,<br><span class="accent-gradient">Perfect Immersion</span></h1>
                 <p>Pro-level noise cancellation and studio-quality audio.</p>
                 <a href="#features" class="cta-btn">Learn More</a>
             </div>
-            <div class="hero-image">
-                <img src="image.png"
-                    alt="Premium Wireless Earphones">
+            <div class="hero-image reveal" style="transition-delay: 0.2s;">
+                <img src="image.png" alt="IRIVER Premium Wireless Earphones">
             </div>
         </div>
     </section>
 
     <section class="features" id="features">
-        <h2 class="section-title">Innovation in Every Detail</h2>
-        <p class="section-desc">Experience a completely new way to listen with SoundMakers' proprietary audio
+        <h2 class="section-title text-gradient reveal">Innovation in Every Detail</h2>
+        <p class="section-desc reveal">Experience a completely new way to listen with IRIVER's proprietary audio
             technology.</p>
         <div class="feature-grid">
-            <div class="feature-card">
+            <div class="feature-card reveal" style="transition-delay: 0.1s;">
                 <i class="fa-solid fa-ear-listen"></i>
                 <h3>Stunning Noise Cancellation</h3>
                 <p>Analyzes ambient noise 200 times per second to create near-perfect silence.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card reveal" style="transition-delay: 0.2s;">
                 <i class="fa-solid fa-battery-full"></i>
                 <h3>Incredible Battery Life</h3>
                 <p>Get 40 hours of playtime on a single charge, and 3 hours from just a 5-minute quick charge.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card reveal" style="transition-delay: 0.3s;">
                 <i class="fa-solid fa-cloud"></i>
                 <h3>Cloud-like Comfort</h3>
                 <p>Designed by analyzing thousands of ear shapes to provide a comfortable fit all day long.</p>
@@ -539,27 +593,26 @@
     </section>
 
     <section class="story" id="story">
-        <h2 class="section-title">Uncompromising Dedication to Sound</h2>
-        <p class="section-desc">Delivering the artist's intent to your ears without distortion is our only goal.</p>
         <div class="story-content">
-            <div class="story-image">
-                <img src="image2.png"
-                    alt="Earphone acoustic engineering story">
-            </div>
-            <div class="story-text">
+            <div class="story-text reveal">
+                <h2 class="section-title text-gradient" style="text-align: left; margin-bottom: 1.5rem;">
+                    Uncompromising<br>Dedication to Sound</h2>
                 <p>Decades of audio engineering expertise are packed into these small earbuds. We have completely
                     redesigned every component, from the diaphragm of the driver to the acoustic vent structure.</p>
                 <p>After tens of thousands of tuning tests, we found the perfect balance of deep, rich bass and
                     crystal-clear highs. We built this not just as an electronic device, but with the mindset of
                     creating a true 'instrument'.</p>
             </div>
+            <div class="story-image reveal" style="transition-delay: 0.2s;">
+                <img src="image2.png" alt="Earphone acoustic engineering story">
+            </div>
         </div>
     </section>
 
     <section class="specs" id="specs">
-        <h2 class="section-title">Tech Specs</h2>
-        <p class="section-desc">A finely tuned, innovative hardware lineup</p>
-        <div class="spec-list">
+        <h2 class="section-title text-gradient reveal">Tech Specs</h2>
+        <p class="section-desc reveal">A finely tuned, innovative hardware lineup</p>
+        <div class="spec-list reveal" style="transition-delay: 0.2s;">
             <div class="spec-item">
                 <div class="spec-title">Bluetooth Version</div>
                 <div class="spec-value">Bluetooth 5.3 (LE Audio Supported)</div>
@@ -584,19 +637,40 @@
     </section>
 
     <section class="contact" id="contact">
-        <h2 class="section-title">How can we help?</h2>
-        <p class="section-desc">Leave a message for product inquiries, partnerships, or any other questions.</p>
-        <form class="contact-form" action="#" method="POST">
+        <h2 class="section-title text-gradient reveal">How can we help?</h2>
+        <p class="section-desc reveal">Leave a message for product inquiries, partnerships, or any other questions.</p>
+        <form class="contact-form reveal" style="transition-delay: 0.2s;" action="#" method="POST">
             <input type="text" placeholder="Name" required>
             <input type="email" placeholder="Email Address" required>
             <textarea rows="4" placeholder="Please describe your inquiry in detail." required></textarea>
             <button type="submit">Submit Request</button>
         </form>
         <footer>
-            <p>&copy; 2026 SoundMakers. Designed with Passion.</p>
+            <p>&copy; 2026 IRIVER. Designed with Passion.</p>
         </footer>
     </section>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const observerOptions = {
+                root: null,
+                rootMargin: "0px",
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
 </body>
 
 </html>
