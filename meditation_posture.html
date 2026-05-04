@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>명상 자세 분석 — BeeSang Vision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-deep: #0e1411;
+    --bg-mid: #161d19;
+    --bg-soft: #1d2520;
+    --ink: #e8ebe6;
+    --ink-soft: #a8b0a5;
+    --ink-faint: #5a6259;
+    --jade: #7fb89c;
+    --jade-deep: #3e7a5e;
+    --ochre: #d4a574;
+    --rose: #c97564;
+    --line: rgba(232, 235, 230, 0.08);
+    --grain: rgba(232, 235, 230, 0.015);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg-deep);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 30% 20%, rgba(127, 184, 156, 0.04), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(212, 165, 116, 0.03), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+  }
+
+  .title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    font-variation-settings: 'opsz' 144;
+  }
+
+  .title em {
+    font-style: italic;
+    color: var(--jade);
+  }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 40px;
+  }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  /* ===== Video panel ===== */
+  .video-card {
+    background: var(--bg-mid);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .video-frame {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: #000;
+    overflow: hidden;
+  }
+
+  #webcam, #poseCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+  }
+
+  #poseCanvas { z-index: 2; pointer-events: none; }
+  #webcam { z-index: 1; }
+
+  .video-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: var(--ink-faint);
+    z-index: 3;
+    background: var(--bg-mid);
+  }
+
+  .video-placeholder.hidden { display: none; }
+
+  .placeholder-mark {
+    width: 64px;
+    height: 64px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 24px;
+    color: var(--jade);
+  }
+
+  .placeholder-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+
+  .controls {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--line);
+  }
+
+  .btn {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink-soft);
+    padding: 12px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--jade);
+    border-color: var(--jade);
+    color: var(--bg-deep);
+  }
+
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .btn.active {
+    background: var(--ochre);
+    border-color: var(--ochre);
+    color: var(--bg-deep);
+  }
+
+  .btn-subtle {
+    border-color: var(--line);
+    color: var(--ink-soft);
+    padding: 12px 18px;
+  }
+
+  .btn-subtle:hover:not(:disabled) {
+    background: var(--bg-soft);
+    border-color: var(--ink-soft);
+    color: var(--ink);
+  }
+
+  .btn-subtle.calibrated {
+    border-color: var(--jade-deep);
+    color: var(--jade);
+  }
+
+  /* 캘리브레이션 카운트다운 오버레이 */
+  .calib-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(14, 20, 17, 0.78);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 4;
+    backdrop-filter: blur(2px);
+  }
+
+  .calib-overlay.hidden { display: none; }
+
+  .calib-count {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 96px;
+    color: var(--jade);
+    line-height: 1;
+    font-variation-settings: 'opsz' 144;
+  }
+
+  .calib-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-soft);
+  }
+  .session-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== Status display ===== */
+  .status-card {
+    background: var(--bg-mid);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .status-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top right, rgba(127, 184, 156, 0.08), transparent 70%);
+    pointer-events: none;
+    transition: opacity 0.8s;
+    opacity: 1;
+  }
+
+  .status-card.warning::before {
+    background: radial-gradient(ellipse at top right, rgba(201, 117, 100, 0.12), transparent 70%);
+  }
+
+  .status-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    margin-bottom: 12px;
+  }
+
+  .status-text {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 48px;
+    letter-spacing: -0.02em;
+    font-variation-settings: 'opsz' 144;
+    color: var(--jade);
+    transition: color 1.2s ease;
+    line-height: 1;
+  }
+
+  .status-card.warning .status-text {
+    color: var(--rose);
+  }
+
+  .status-detail {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 16px;
+    min-height: 22px;
+    transition: opacity 0.6s;
+  }
+
+  /* ===== Metrics ===== */
+  .metrics-card {
+    background: var(--bg-mid);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px 32px;
+  }
+
+  .metrics-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .metric {
+    margin-bottom: 22px;
+  }
+
+  .metric:last-child { margin-bottom: 0; }
+
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .metric-name {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 16px;
+    color: var(--ink);
+  }
+
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+  }
+
+  .metric-bar {
+    position: relative;
+    height: 3px;
+    background: var(--bg-soft);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .metric-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    background: var(--jade);
+    transition: width 0.3s ease, background 0.5s ease;
+  }
+
+  .metric.bad .metric-fill { background: var(--rose); }
+  .metric.warn .metric-fill { background: var(--ochre); }
+
+  .metric-threshold {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 1px;
+    background: var(--ink-faint);
+    opacity: 0.6;
+  }
+
+  /* ===== Window indicator ===== */
+  .window-card {
+    background: var(--bg-mid);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-top: 24px;
+  }
+
+  .window-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .window-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+  }
+
+  .window-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .window-bar {
+    height: 6px;
+    background: var(--bg-soft);
+    border-radius: 1px;
+    overflow: hidden;
+    display: flex;
+    gap: 1px;
+  }
+
+  .window-cell {
+    flex: 1;
+    background: var(--jade-deep);
+    opacity: 0.4;
+    transition: all 0.3s;
+  }
+
+  .window-cell.bad {
+    background: var(--rose);
+    opacity: 0.9;
+  }
+
+  /* ===== Eye state card ===== */
+  .eye-card {
+    background: var(--bg-mid);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-top: 24px;
+  }
+
+  .eye-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 18px;
+  }
+
+  .eye-state-text {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 18px;
+    color: var(--jade);
+    transition: color 0.6s ease;
+  }
+
+  .eye-card.closed .eye-state-text { color: var(--ochre); }
+  .eye-card.no-face .eye-state-text { color: var(--ink-faint); }
+
+  /* ===== Distract time (눈 뜬 시간) ===== */
+  .distract-display {
+    text-align: center;
+    padding: 18px 0 14px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+
+  .distract-time {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 56px;
+    letter-spacing: -0.03em;
+    font-variation-settings: 'opsz' 144;
+    color: var(--ink);
+    line-height: 1;
+    transition: color 1s ease;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .eye-card.closed .distract-time { color: var(--jade); }
+  .eye-card.resetting .distract-time { color: var(--ochre); }
+
+  .distract-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+    margin-top: 10px;
+    min-height: 14px;
+    transition: color 0.6s ease;
+  }
+
+  .eye-card.closed .distract-hint { color: var(--jade); }
+
+  .distract-progress {
+    height: 2px;
+    background: var(--bg-soft);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .distract-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--jade);
+    transition: width 0.15s linear, background 0.4s ease;
+  }
+
+  .eye-card.resetting .distract-progress-fill {
+    background: var(--ochre);
+  }
+
+  .eye-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .eye-stat {
+    border-left: 1px solid var(--line);
+    padding-left: 12px;
+  }
+
+  .eye-stat:first-child { border-left: none; padding-left: 0; }
+
+  .eye-stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  .eye-stat-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    font-variation-settings: 'opsz' 144;
+  }
+
+  .eye-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+
+  .eye-shape {
+    position: relative;
+    width: 80px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .eye-pupil {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--jade);
+    transition: background 0.4s ease, transform 0.4s ease;
+    z-index: 1;
+  }
+
+  .eye-card.closed .eye-pupil {
+    background: var(--ochre);
+    transform: scale(0.4);
+  }
+
+  .eye-lid {
+    position: absolute;
+    left: 0; right: 0;
+    height: 50%;
+    background: var(--bg-mid);
+    border: 1px solid var(--ink-soft);
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+  }
+
+  .eye-lid-top {
+    top: 0;
+    border-bottom: none;
+    border-radius: 999px 999px 0 0;
+    transform: translateY(-100%);
+  }
+
+  .eye-lid-bottom {
+    bottom: 0;
+    border-top: none;
+    border-radius: 0 0 999px 999px;
+    transform: translateY(100%);
+  }
+
+  .eye-card.closed .eye-lid-top {
+    transform: translateY(0);
+  }
+
+  .eye-card.closed .eye-lid-bottom {
+    transform: translateY(0);
+  }
+
+  .eye-card.no-face .eye-pupil {
+    background: var(--ink-faint);
+    opacity: 0.4;
+  }
+
+  /* ===== Loading ===== */
+  .loading {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: opacity 0.6s;
+  }
+
+  .loading.hidden { opacity: 0; pointer-events: none; }
+
+  .loading-text {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--jade);
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Subtle pulse when warning active */
+  @keyframes gentle-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+
+  .status-card.warning {
+    animation: gentle-pulse 2.4s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="loading-text">자세 분석 모델을 불러오는 중…</div>
+</div>
+
+<div class="container">
+  <header>
+    <h1 class="title">명상 자세 <em>분석</em></h1>
+    <div class="subtitle">BEESANG · VISION MODULE · v0.1</div>
+  </header>
+
+  <div class="layout">
+    <!-- Left: video -->
+    <div>
+      <div class="video-card">
+        <div class="video-frame">
+          <video id="webcam" autoplay playsinline muted></video>
+          <canvas id="poseCanvas"></canvas>
+          <div class="video-placeholder" id="placeholder">
+            <div class="placeholder-mark">禪</div>
+            <div class="placeholder-text">카메라를 시작해 주세요</div>
+          </div>
+          <div class="calib-overlay hidden" id="calibOverlay">
+            <div class="calib-count" id="calibCount">3</div>
+            <div class="calib-text">바른 자세를 유지하세요</div>
+          </div>
+        </div>
+        <div class="controls">
+          <button id="startBtn" class="btn">카메라 시작</button>
+          <button id="calibBtn" class="btn btn-subtle" disabled>기준 자세 설정</button>
+          <div class="session-time" id="sessionTime">00:00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: status + metrics -->
+    <div>
+      <div class="status-card" id="statusCard">
+        <div class="status-eyebrow">현재 상태</div>
+        <div class="status-text" id="statusText">대기</div>
+        <div class="status-detail" id="statusDetail">측정을 시작하면 자세를 분석합니다.</div>
+      </div>
+
+      <div class="metrics-card">
+        <div class="metrics-title">지표</div>
+
+        <div class="metric" id="m-lateral">
+          <div class="metric-row">
+            <span class="metric-name">척추 정렬</span>
+            <span class="metric-value" id="v-lateral">—</span>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="f-lateral"></div>
+            <div class="metric-threshold" style="left: 50%"></div>
+          </div>
+        </div>
+
+        <div class="metric" id="m-shoulder">
+          <div class="metric-row">
+            <span class="metric-name">어깨 균형</span>
+            <span class="metric-value" id="v-shoulder">—</span>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="f-shoulder"></div>
+            <div class="metric-threshold" style="left: 50%"></div>
+          </div>
+        </div>
+
+        <div class="metric" id="m-headDrop">
+          <div class="metric-row">
+            <span class="metric-name">고개 떨굼</span>
+            <span class="metric-value" id="v-headDrop">—</span>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="f-headDrop"></div>
+            <div class="metric-threshold" style="left: 50%"></div>
+          </div>
+        </div>
+
+        <div class="metric" id="m-forward">
+          <div class="metric-row">
+            <span class="metric-name">거북목</span>
+            <span class="metric-value" id="v-forward">—</span>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="f-forward"></div>
+            <div class="metric-threshold" style="left: 50%"></div>
+          </div>
+        </div>
+
+        <div class="metric" id="m-motion">
+          <div class="metric-row">
+            <span class="metric-name">움직임</span>
+            <span class="metric-value" id="v-motion">—</span>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="f-motion"></div>
+            <div class="metric-threshold" style="left: 50%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="window-card">
+        <div class="window-row">
+          <span class="window-label">10초 윈도우</span>
+          <span class="window-value" id="windowStat">0%</span>
+        </div>
+        <div class="window-bar" id="windowBar"></div>
+      </div>
+
+      <div class="eye-card">
+        <div class="eye-header">
+          <span class="window-label">눈 뜬 시간</span>
+          <span class="eye-state-text" id="eyeStateText">대기</span>
+        </div>
+        <div class="distract-display">
+          <div class="distract-time" id="distractTime">00:00</div>
+          <div class="distract-hint" id="distractHint">눈을 감으면 측정이 시작됩니다</div>
+        </div>
+        <div class="distract-progress">
+          <div class="distract-progress-fill" id="distractProgressFill"></div>
+        </div>
+        <div class="eye-indicator" id="eyeIndicator">
+          <div class="eye-shape" id="eyeShape">
+            <div class="eye-lid eye-lid-top"></div>
+            <div class="eye-pupil"></div>
+            <div class="eye-lid eye-lid-bottom"></div>
+          </div>
+        </div>
+        <div class="eye-grid">
+          <div class="eye-stat">
+            <div class="eye-stat-label">EAR</div>
+            <div class="eye-stat-value" id="eyeEar">—</div>
+          </div>
+          <div class="eye-stat">
+            <div class="eye-stat-label">감은 비율</div>
+            <div class="eye-stat-value" id="eyeClosedRatio">—</div>
+          </div>
+          <div class="eye-stat">
+            <div class="eye-stat-label">깜빡임</div>
+            <div class="eye-stat-value" id="eyeBlinks">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import {
+  PoseLandmarker,
+  FaceLandmarker,
+  FilesetResolver,
+  DrawingUtils
+} from "https://esm.sh/@mediapipe/tasks-vision@0.10.3";
+
+// ============================================================
+// 1) 설정
+// ============================================================
+const CONFIG = {
+  // 각 지표 임계값 (어깨 너비 정규화 기준)
+  thresholds: {
+    lateral:   0.18,  // 척추 좌우 기울기
+    shoulder:  0.12,  // 어깨 좌우 높이차
+    headDrop:  0.45,  // 고개 떨굼 (1.0이 최대 떨굼, 작을수록 정상)
+    forward:   0.30,  // 거북목: (귀 z − 어깨 z) / 어깨너비. 값이 클수록 거북목 심함
+    motion:    0.025  // 평균 키포인트 속도
+  },
+  // 캘리브레이션
+  calib: {
+    countdownSeconds: 3,    // "기준 자세 설정" 누르고 카운트다운
+    sampleSeconds: 1.5      // 카운트다운 후 이 시간 동안 평균을 내서 기준값으로 저장
+  },
+  // 윈도우 분석
+  windowSeconds: 10,
+  fps: 30,
+  badRatioToWarn: 0.5,    // 윈도우의 50% 이상이 bad → 경고
+  recoverSeconds: 3,      // 회복 후 3초 정상이면 경고 해제
+  // EMA 평활화
+  emaAlpha: 0.25,
+  // 눈 감음 감지 (Eye Aspect Ratio)
+  eye: {
+    closedThreshold: 0.18,   // EAR이 이 값 이하면 감은 눈으로 판정
+    openThreshold:   0.24,   // EAR이 이 값 이상이면 뜬 눈 (히스테리시스)
+    blinkMinFrames:  1,      // 깜빡임 최소 프레임
+    blinkMaxFrames:  9,      // 이 프레임 이상 감으면 깜빡임이 아닌 "감은 상태"로 분류
+    earEmaAlpha:     0.4,
+    resetSeconds:    3       // 이 시간 이상 연속으로 감으면 "눈 뜬 시간" 0으로 리셋
+  }
+};
+
+// ============================================================
+// 2) DOM 참조
+// ============================================================
+const $ = (id) => document.getElementById(id);
+const video = $("webcam");
+const canvas = $("poseCanvas");
+const ctx = canvas.getContext("2d");
+const startBtn = $("startBtn");
+const calibBtn = $("calibBtn");
+const calibOverlay = $("calibOverlay");
+const calibCount = $("calibCount");
+const placeholder = $("placeholder");
+const statusCard = $("statusCard");
+const statusText = $("statusText");
+const statusDetail = $("statusDetail");
+const sessionTime = $("sessionTime");
+const windowBar = $("windowBar");
+const windowStat = $("windowStat");
+const loadingEl = $("loading");
+// 눈 상태 UI
+const eyeCard = document.querySelector(".eye-card");
+const eyeStateText = $("eyeStateText");
+const eyeEar = $("eyeEar");
+const eyeClosedRatio = $("eyeClosedRatio");
+const eyeBlinks = $("eyeBlinks");
+const distractTime = $("distractTime");
+const distractHint = $("distractHint");
+const distractProgressFill = $("distractProgressFill");
+
+// 윈도우 셀(10초 = 30칸으로 시각화)
+const WINDOW_CELLS = 30;
+const cellEls = [];
+for (let i = 0; i < WINDOW_CELLS; i++) {
+  const c = document.createElement("div");
+  c.className = "window-cell";
+  windowBar.appendChild(c);
+  cellEls.push(c);
+}
+
+// ============================================================
+// 3) MediaPipe Pose + Face 초기화
+// ============================================================
+let poseLandmarker = null;
+let faceLandmarker = null;
+let drawingUtils = null;
+
+async function initPose() {
+  const fileset = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+  );
+  poseLandmarker = await PoseLandmarker.createFromOptions(fileset, {
+    baseOptions: {
+      modelAssetPath:
+        "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+      delegate: "GPU"
+    },
+    runningMode: "VIDEO",
+    numPoses: 1,
+    minPoseDetectionConfidence: 0.5,
+    minPosePresenceConfidence: 0.5,
+    minTrackingConfidence: 0.5
+  });
+  faceLandmarker = await FaceLandmarker.createFromOptions(fileset, {
+    baseOptions: {
+      modelAssetPath:
+        "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+      delegate: "GPU"
+    },
+    runningMode: "VIDEO",
+    numFaces: 1,
+    minFaceDetectionConfidence: 0.5,
+    minFacePresenceConfidence: 0.5,
+    minTrackingConfidence: 0.5,
+    outputFaceBlendshapes: false
+  });
+  drawingUtils = new DrawingUtils(ctx);
+  loadingEl.classList.add("hidden");
+}
+
+// ============================================================
+// 4) 자세 지표 계산
+// ============================================================
+const L = {
+  NOSE: 0,
+  LEFT_EAR: 7,  RIGHT_EAR: 8,
+  LEFT_SHOULDER: 11, RIGHT_SHOULDER: 12,
+  LEFT_HIP: 23, RIGHT_HIP: 24
+};
+
+const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: (a.z + b.z) / 2 });
+const dist2D = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+let prevLandmarks = null;
+
+// 캘리브레이션 baseline (자세가 바를 때의 기준값)
+// null이면 미캘리브레이션 상태 → 절대값 기반 fallback 사용
+let baseline = null;
+
+// 캘리브레이션 진행 상태
+const calibState = {
+  sampling: false,
+  samples: []  // 샘플링 동안 _rawForward 객체들이 쌓임
+};
+
+async function startCalibration() {
+  if (!running) return;
+  if (calibState.sampling) return;
+
+  // 카운트다운
+  calibOverlay.classList.remove("hidden");
+  const countdown = CONFIG.calib.countdownSeconds;
+  for (let i = countdown; i >= 1; i--) {
+    calibCount.textContent = String(i);
+    await new Promise(r => setTimeout(r, 1000));
+  }
+
+  // 샘플링 시작
+  calibState.samples = [];
+  calibState.sampling = true;
+  calibCount.textContent = "···";
+
+  await new Promise(r => setTimeout(r, CONFIG.calib.sampleSeconds * 1000));
+
+  calibState.sampling = false;
+  calibOverlay.classList.add("hidden");
+
+  // 샘플 평균
+  if (calibState.samples.length < 5) {
+    statusDetail.textContent = "샘플이 부족합니다. 다시 시도해 주세요.";
+    return;
+  }
+  let sum = 0;
+  for (const s of calibState.samples) sum += s.zSignal;
+  baseline = { zSignal: sum / calibState.samples.length };
+  calibState.samples = [];
+
+  // forward EMA도 리셋해서 즉시 새 baseline 반영
+  ema.forward = 0;
+
+  calibBtn.classList.add("calibrated");
+  calibBtn.textContent = "기준 재설정";
+  console.log("[calibrated]", baseline);
+}
+
+// 거북목 raw 시그널: 귀 z와 어깨 z의 차이를 어깨 너비로 정규화
+//   sMid.z - eMid.z > 0  →  귀가 어깨보다 카메라 쪽 (앞)  →  거북목
+//   sWidth로 나누면 카메라와의 거리에 무관해짐
+//   (멀어질수록 z 절대값과 sWidth가 함께 작아져서 비율은 일정)
+function computeForwardSignal(lm, sMid, sWidth) {
+  const lE = lm[L.LEFT_EAR], rE = lm[L.RIGHT_EAR];
+  const eMid = mid(lE, rE);
+  return { zSignal: (sMid.z - eMid.z) / sWidth };
+}
+
+function computeMetrics(lm, faceLm) {
+  const lS = lm[L.LEFT_SHOULDER], rS = lm[L.RIGHT_SHOULDER];
+  const lH = lm[L.LEFT_HIP],      rH = lm[L.RIGHT_HIP];
+  const lE = lm[L.LEFT_EAR],      rE = lm[L.RIGHT_EAR];
+
+  const sMid = mid(lS, rS);
+  const hMid = mid(lH, rH);
+  const eMid = mid(lE, rE);
+  const sWidth = Math.max(0.01, Math.abs(lS.x - rS.x));
+
+  // 1. 척추 좌우 기울기: 어깨 중점 vs 골반 중점 x 편차
+  const lateral = Math.abs(sMid.x - hMid.x) / sWidth;
+
+  // 2. 어깨 좌우 균형: 좌우 어깨 y차이
+  const shoulder = Math.abs(lS.y - rS.y) / sWidth;
+
+  // 3. 고개 떨굼: 귀-어깨 y거리가 작아지면 머리가 떨어진 것
+  const earShoulderY = Math.abs(eMid.y - sMid.y) / sWidth;
+  const headDrop = Math.max(0, 1 - earShoulderY);
+
+  // 4. 거북목: 귀 z와 어깨 z의 차이만 사용 (어깨 너비로 정규화)
+  //   캘리브레이션이 있으면 baseline 대비 추가로 앞으로 나온 정도만 측정
+  const sig = computeForwardSignal(lm, sMid, sWidth);
+  let forward;
+  if (baseline) {
+    forward = Math.max(0, sig.zSignal - baseline.zSignal);
+  } else {
+    forward = Math.max(0, sig.zSignal);
+  }
+
+  // 5. 움직임: 직전 프레임 대비 키포인트 변위 평균
+  let motion = 0;
+  if (prevLandmarks) {
+    const keys = [L.NOSE, L.LEFT_SHOULDER, L.RIGHT_SHOULDER, L.LEFT_EAR, L.RIGHT_EAR];
+    let sum = 0;
+    for (const k of keys) sum += dist2D(lm[k], prevLandmarks[k]);
+    motion = sum / keys.length;
+  }
+  prevLandmarks = lm.map(p => ({ x: p.x, y: p.y, z: p.z }));
+
+  return { lateral, shoulder, headDrop, forward, motion, _rawForward: sig };
+}
+
+// EMA 평활화
+const ema = { lateral: 0, shoulder: 0, headDrop: 0, forward: 0, motion: 0 };
+function smooth(metrics) {
+  const a = CONFIG.emaAlpha;
+  for (const k in ema) ema[k] = a * metrics[k] + (1 - a) * ema[k];
+  return { ...ema };
+}
+
+// ============================================================
+// 4-2) 눈 감음 감지 (Eye Aspect Ratio)
+// ============================================================
+// MediaPipe FaceLandmarker (478 landmarks) 의 눈 주변 인덱스
+// 각 눈마다 6점을 사용해 EAR = (|p2-p6| + |p3-p5|) / (2 * |p1-p4|) 계산
+const EYE_LM = {
+  left:  { p1: 33,  p2: 160, p3: 158, p4: 133, p5: 153, p6: 144 },
+  right: { p1: 362, p2: 385, p3: 387, p4: 263, p5: 373, p6: 380 }
+};
+
+function eyeAspectRatio(lm, eye) {
+  const p1 = lm[eye.p1], p2 = lm[eye.p2], p3 = lm[eye.p3];
+  const p4 = lm[eye.p4], p5 = lm[eye.p5], p6 = lm[eye.p6];
+  const vert1 = Math.hypot(p2.x - p6.x, p2.y - p6.y);
+  const vert2 = Math.hypot(p3.x - p5.x, p3.y - p5.y);
+  const horiz = Math.hypot(p1.x - p4.x, p1.y - p4.y);
+  if (horiz < 1e-6) return 0;
+  return (vert1 + vert2) / (2 * horiz);
+}
+
+// 눈 상태 추적
+const eyeState = {
+  earSmoothed: 0.3,         // EMA로 평활화된 EAR
+  closed: false,            // 현재 감음 여부 (히스테리시스 적용)
+  closedFrames: 0,          // 연속으로 감은 프레임 수
+  blinkCount: 0,            // 세션 동안 깜빡임 횟수
+  closedTotalFrames: 0,     // 세션 동안 눈 감은 누적 프레임
+  totalFrames: 0,           // 세션 동안 측정된 총 프레임
+  faceDetected: false,
+  lastClosedTransitionFrames: 0
+};
+
+// "눈 뜬 시간" 카운터 (명상 흩어짐 측정)
+// - 눈 뜨고 있는 동안 누적 시간 증가
+// - 연속으로 resetSeconds 이상 눈 감으면 0으로 리셋
+const distract = {
+  openMs: 0,              // 누적된 눈 뜬 시간 (ms)
+  closedStartedAt: 0,     // 현재 감기 시작한 시각 (0이면 안 감음)
+  lastTickAt: 0,          // 마지막 갱신 시각
+  hasReset: false         // 이번 감기에서 이미 리셋했는지
+};
+
+function resetDistract() {
+  distract.openMs = 0;
+  distract.closedStartedAt = 0;
+  distract.lastTickAt = 0;
+  distract.hasReset = false;
+}
+
+function resetEyeState() {
+  eyeState.earSmoothed = 0.3;
+  eyeState.closed = false;
+  eyeState.closedFrames = 0;
+  eyeState.blinkCount = 0;
+  eyeState.closedTotalFrames = 0;
+  eyeState.totalFrames = 0;
+  eyeState.faceDetected = false;
+  eyeState.lastClosedTransitionFrames = 0;
+}
+
+// face landmarks를 받아 EAR을 갱신하고 상태를 반환
+function updateEyeState(faceLm) {
+  if (!faceLm) {
+    eyeState.faceDetected = false;
+    return null;
+  }
+  eyeState.faceDetected = true;
+
+  const earL = eyeAspectRatio(faceLm, EYE_LM.left);
+  const earR = eyeAspectRatio(faceLm, EYE_LM.right);
+  const earRaw = (earL + earR) / 2;
+
+  // EMA 평활화
+  const a = CONFIG.eye.earEmaAlpha;
+  eyeState.earSmoothed = a * earRaw + (1 - a) * eyeState.earSmoothed;
+  const ear = eyeState.earSmoothed;
+
+  // 히스테리시스: closed로 진입은 closedThreshold, 해제는 openThreshold
+  const wasClosed = eyeState.closed;
+  if (!wasClosed && ear < CONFIG.eye.closedThreshold) {
+    eyeState.closed = true;
+    eyeState.closedFrames = 1;
+  } else if (wasClosed && ear > CONFIG.eye.openThreshold) {
+    // 감았다가 떴을 때 → 깜빡임 또는 의도적 감음 종료
+    if (eyeState.closedFrames >= CONFIG.eye.blinkMinFrames &&
+        eyeState.closedFrames <= CONFIG.eye.blinkMaxFrames) {
+      eyeState.blinkCount++;
+    }
+    eyeState.closed = false;
+    eyeState.lastClosedTransitionFrames = eyeState.closedFrames;
+    eyeState.closedFrames = 0;
+  } else if (eyeState.closed) {
+    eyeState.closedFrames++;
+  }
+
+  eyeState.totalFrames++;
+  if (eyeState.closed) eyeState.closedTotalFrames++;
+
+  return {
+    ear,
+    closed: eyeState.closed,
+    sustainedClosed: eyeState.closedFrames > CONFIG.eye.blinkMaxFrames,
+    closedRatio: eyeState.totalFrames > 0
+      ? eyeState.closedTotalFrames / eyeState.totalFrames
+      : 0,
+    blinkCount: eyeState.blinkCount
+  };
+}
+
+// ============================================================
+// 5) 슬라이딩 윈도우 (bad/good 누적)
+// ============================================================
+const windowSize = CONFIG.windowSeconds * CONFIG.fps;
+const windowBuf = []; // { bad: bool, reason: string }
+
+function isBad(m) {
+  const t = CONFIG.thresholds;
+  const reasons = [];
+  if (m.lateral  > t.lateral)  reasons.push("척추가 옆으로 기울어졌습니다");
+  if (m.shoulder > t.shoulder) reasons.push("어깨 높이가 고르지 않습니다");
+  if (m.headDrop > t.headDrop) reasons.push("고개가 떨어지고 있습니다");
+  if (m.forward  > t.forward)  reasons.push("머리가 앞으로 나와 있습니다");
+  if (m.motion   > t.motion)   reasons.push("움직임이 많습니다");
+  return { bad: reasons.length > 0, reasons };
+}
+
+function pushWindow(state) {
+  windowBuf.push(state);
+  if (windowBuf.length > windowSize) windowBuf.shift();
+}
+
+function badRatio() {
+  if (windowBuf.length === 0) return 0;
+  let n = 0;
+  for (const s of windowBuf) if (s.bad) n++;
+  return n / windowBuf.length;
+}
+
+// ============================================================
+// 6) 경고 상태머신
+// ============================================================
+let warningActive = false;
+let recoverFrames = 0;
+
+function updateWarningState(curBad) {
+  const ratio = badRatio();
+  if (!warningActive) {
+    if (ratio >= CONFIG.badRatioToWarn) {
+      warningActive = true;
+      recoverFrames = 0;
+    }
+  } else {
+    if (!curBad) {
+      recoverFrames++;
+      if (recoverFrames >= CONFIG.recoverSeconds * CONFIG.fps) {
+        warningActive = false;
+        recoverFrames = 0;
+      }
+    } else {
+      recoverFrames = 0;
+    }
+  }
+  return { warningActive, ratio };
+}
+
+// ============================================================
+// 7) UI 갱신
+// ============================================================
+function setBar(id, value, threshold) {
+  const fill = $(`f-${id}`);
+  const metric = $(`m-${id}`);
+  // 시각화: 임계값을 50% 위치에 배치하고 비율로 채움
+  const ratio = Math.min(1, value / (threshold * 2));
+  fill.style.width = `${ratio * 100}%`;
+  metric.classList.remove("bad", "warn");
+  if (value > threshold) metric.classList.add("bad");
+  else if (value > threshold * 0.7) metric.classList.add("warn");
+  $(`v-${id}`).textContent = value.toFixed(3);
+}
+
+function updateUI(m, badInfo, ws) {
+  setBar("lateral",  m.lateral,  CONFIG.thresholds.lateral);
+  setBar("shoulder", m.shoulder, CONFIG.thresholds.shoulder);
+  setBar("headDrop", m.headDrop, CONFIG.thresholds.headDrop);
+  setBar("forward",  m.forward,  CONFIG.thresholds.forward);
+  setBar("motion",   m.motion,   CONFIG.thresholds.motion);
+
+  // 윈도우 셀 갱신
+  const stride = Math.max(1, Math.floor(windowBuf.length / WINDOW_CELLS));
+  for (let i = 0; i < WINDOW_CELLS; i++) {
+    const idx = i * stride;
+    const s = windowBuf[idx];
+    cellEls[i].classList.toggle("bad", !!(s && s.bad));
+  }
+  windowStat.textContent = `${Math.round(ws.ratio * 100)}%`;
+
+  // 상태
+  if (ws.warningActive) {
+    statusCard.classList.add("warning");
+    statusText.textContent = "흩어짐";
+    statusDetail.textContent = badInfo.reasons[0] || "자세를 다시 정돈해 보세요.";
+  } else if (badInfo.bad) {
+    statusCard.classList.remove("warning");
+    statusText.textContent = "주의";
+    statusDetail.textContent = badInfo.reasons[0] || "자세를 점검해 주세요.";
+  } else {
+    statusCard.classList.remove("warning");
+    statusText.textContent = "고요";
+    statusDetail.textContent = "안정된 자세를 유지하고 있습니다.";
+  }
+}
+
+function formatTime(ms) {
+  const sec = Math.floor(ms / 1000);
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+// distract(눈 뜬 시간) 상태를 시간 기반으로 갱신
+// 반환: { resetting: 감는 중 진행률 0~1, justReset: 이번 호출에 리셋되었는지 }
+function updateDistract(eyeInfo) {
+  const now = performance.now();
+  const resetMs = CONFIG.eye.resetSeconds * 1000;
+
+  // 얼굴이 안 잡히면 시간만 흘려보내고 상태 변화 없음
+  if (!eyeInfo) {
+    distract.lastTickAt = now;
+    return { resetting: 0, justReset: false };
+  }
+
+  let justReset = false;
+
+  if (eyeInfo.closed) {
+    // 눈 감음: 누적 중지, 감은 시간 측정 시작
+    if (distract.closedStartedAt === 0) {
+      distract.closedStartedAt = now;
+      distract.hasReset = false;
+    }
+    const closedFor = now - distract.closedStartedAt;
+
+    // 3초 이상 감으면 한 번 리셋
+    if (!distract.hasReset && closedFor >= resetMs) {
+      distract.openMs = 0;
+      distract.hasReset = true;
+      justReset = true;
+    }
+
+    distract.lastTickAt = now;
+    const resetting = Math.min(1, closedFor / resetMs);
+    return { resetting, justReset };
+  }
+
+  // 눈 뜸: 시간 누적
+  if (distract.lastTickAt > 0) {
+    distract.openMs += now - distract.lastTickAt;
+  }
+  distract.lastTickAt = now;
+  distract.closedStartedAt = 0;
+  distract.hasReset = false;
+  return { resetting: 0, justReset: false };
+}
+
+function updateEyeUI(eyeInfo) {
+  // distract는 얼굴 유무와 무관하게 매 프레임 갱신 (lastTickAt 유지를 위해)
+  const dInfo = updateDistract(eyeInfo);
+
+  if (!eyeInfo) {
+    eyeCard.classList.remove("closed", "resetting");
+    eyeCard.classList.add("no-face");
+    eyeStateText.textContent = "얼굴 없음";
+    eyeEar.textContent = "—";
+    distractHint.textContent = "얼굴이 화면에 보이도록 해주세요";
+    distractProgressFill.style.width = "0%";
+    return;
+  }
+  eyeCard.classList.remove("no-face");
+
+  // 시간 표시
+  distractTime.textContent = formatTime(distract.openMs);
+
+  // 진행 바: 감고 있을 때는 리셋까지의 진행도, 뜨고 있을 때는 비움
+  if (eyeInfo.closed) {
+    eyeCard.classList.add("closed");
+    if (dInfo.resetting >= 1) {
+      eyeCard.classList.remove("resetting");
+      distractProgressFill.style.width = "100%";
+      distractHint.textContent = "고요한 상태입니다";
+    } else {
+      eyeCard.classList.add("resetting");
+      distractProgressFill.style.width = `${dInfo.resetting * 100}%`;
+      const remain = Math.max(0, CONFIG.eye.resetSeconds -
+        (performance.now() - distract.closedStartedAt) / 1000);
+      distractHint.textContent = `${remain.toFixed(1)}초 후 초기화`;
+    }
+    eyeStateText.textContent = eyeInfo.sustainedClosed ? "감음" : "깜빡임";
+  } else {
+    eyeCard.classList.remove("closed", "resetting");
+    distractProgressFill.style.width = "0%";
+    distractHint.textContent = distract.openMs > 0
+      ? "눈을 감으면 다시 고요해집니다"
+      : "눈을 감으면 측정이 시작됩니다";
+    eyeStateText.textContent = "뜸";
+  }
+
+  eyeEar.textContent = eyeInfo.ear.toFixed(3);
+  eyeClosedRatio.textContent = `${Math.round(eyeInfo.closedRatio * 100)}%`;
+  eyeBlinks.textContent = String(eyeInfo.blinkCount);
+
+  // 의도적 감음/뜸 상태가 변할 때만 외부 이벤트 발행
+  // (깜빡임 단계의 짧은 감음은 전이로 보지 않음)
+  const isSustainedClosed = eyeInfo.sustainedClosed;
+  if (isSustainedClosed && !window._eyesClosed) {
+    window._eyesClosed = true;
+    window.dispatchEvent(new CustomEvent("eyes-closed", {
+      detail: { ear: eyeInfo.ear, closedRatio: eyeInfo.closedRatio }
+    }));
+  } else if (!eyeInfo.closed && window._eyesClosed) {
+    window._eyesClosed = false;
+    window.dispatchEvent(new CustomEvent("eyes-opened", {
+      detail: { ear: eyeInfo.ear, closedRatio: eyeInfo.closedRatio,
+                blinkCount: eyeInfo.blinkCount,
+                openTimeMs: distract.openMs }
+    }));
+  }
+
+  // 리셋 발생 시 외부 이벤트
+  if (dInfo.justReset) {
+    window.dispatchEvent(new CustomEvent("distract-reset", {
+      detail: { reason: "eyes-closed-3s" }
+    }));
+  }
+}
+
+// ============================================================
+// 8) 카메라 + 추론 루프
+// ============================================================
+let stream = null;
+let running = false;
+let sessionStart = 0;
+let lastVideoTime = -1;
+
+async function startCamera() {
+  if (running) {
+    stopCamera();
+    return;
+  }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 1280, height: 720, facingMode: "user" },
+      audio: false
+    });
+  } catch (e) {
+    statusText.textContent = "권한 거부";
+    statusDetail.textContent = "카메라 접근 권한을 허용해야 분석할 수 있습니다.";
+    return;
+  }
+  video.srcObject = stream;
+  await new Promise((r) => (video.onloadedmetadata = r));
+  await video.play();
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  placeholder.classList.add("hidden");
+  startBtn.textContent = "카메라 정지";
+  startBtn.classList.add("active");
+  calibBtn.disabled = false;
+  running = true;
+  sessionStart = Date.now();
+  windowBuf.length = 0;
+  prevLandmarks = null;
+  resetEyeState();
+  resetDistract();
+
+  loop();
+  updateClock();
+}
+
+function stopCamera() {
+  running = false;
+  if (stream) stream.getTracks().forEach((t) => t.stop());
+  stream = null;
+  video.srcObject = null;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  placeholder.classList.remove("hidden");
+  startBtn.textContent = "카메라 시작";
+  startBtn.classList.remove("active");
+  statusCard.classList.remove("warning");
+  statusText.textContent = "대기";
+  statusDetail.textContent = "측정을 시작하면 자세를 분석합니다.";
+  // 캘리브레이션 리셋
+  calibBtn.disabled = true;
+  calibBtn.classList.remove("calibrated");
+  calibBtn.textContent = "기준 자세 설정";
+  calibOverlay.classList.add("hidden");
+  calibState.sampling = false;
+  calibState.samples = [];
+  baseline = null;
+  // 눈 UI 리셋
+  eyeCard.classList.remove("closed", "no-face", "resetting");
+  eyeStateText.textContent = "대기";
+  eyeEar.textContent = "—";
+  eyeClosedRatio.textContent = "—";
+  eyeBlinks.textContent = "0";
+  distractTime.textContent = "00:00";
+  distractHint.textContent = "눈을 감으면 측정이 시작됩니다";
+  distractProgressFill.style.width = "0%";
+  resetDistract();
+}
+
+function updateClock() {
+  if (!running) return;
+  const sec = Math.floor((Date.now() - sessionStart) / 1000);
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  sessionTime.textContent = `${m}:${s}`;
+  setTimeout(updateClock, 500);
+}
+
+async function loop() {
+  if (!running) return;
+
+  if (video.currentTime !== lastVideoTime && poseLandmarker) {
+    lastVideoTime = video.currentTime;
+    const ts = performance.now();
+    const result = poseLandmarker.detectForVideo(video, ts);
+
+    // 얼굴 추론 (눈 감음 + 거북목 정확도 향상)
+    let eyeInfo = null;
+    let faceLm = null;
+    if (faceLandmarker) {
+      const faceResult = faceLandmarker.detectForVideo(video, ts);
+      if (faceResult.faceLandmarks && faceResult.faceLandmarks.length > 0) {
+        faceLm = faceResult.faceLandmarks[0];
+        eyeInfo = updateEyeState(faceLm);
+      } else {
+        eyeInfo = updateEyeState(null);
+      }
+    }
+    updateEyeUI(eyeInfo);
+
+    ctx.save();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (result.landmarks && result.landmarks.length > 0) {
+      const lm = result.landmarks[0];
+
+      // 스켈레톤 그리기 (mirrored)
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      drawingUtils.drawConnectors(lm, PoseLandmarker.POSE_CONNECTIONS, {
+        color: "rgba(127, 184, 156, 0.7)",
+        lineWidth: 2
+      });
+      drawingUtils.drawLandmarks(lm, {
+        color: "rgba(212, 165, 116, 0.9)",
+        radius: 3,
+        lineWidth: 1
+      });
+      ctx.restore();
+
+      // 지표 계산
+      const raw = computeMetrics(lm, faceLm);
+
+      // 캘리브레이션 샘플링 중이면 raw signal 누적
+      if (calibState.sampling) {
+        calibState.samples.push(raw._rawForward);
+      }
+
+      const m = smooth(raw);
+      const badInfo = isBad(m);
+      pushWindow({ bad: badInfo.bad, reasons: badInfo.reasons });
+      const ws = updateWarningState(badInfo.bad);
+      updateUI(m, badInfo, ws);
+
+      // EEG 모듈로 보낼 이벤트 훅 (이 부분에서 BeeSang 메인에 dispatch)
+      if (ws.warningActive && !window._lastWarn) {
+        window.dispatchEvent(new CustomEvent("posture-warning", {
+          detail: { reasons: badInfo.reasons, ratio: ws.ratio }
+        }));
+        window._lastWarn = true;
+      } else if (!ws.warningActive && window._lastWarn) {
+        window.dispatchEvent(new CustomEvent("posture-recovered"));
+        window._lastWarn = false;
+      }
+    } else {
+      ctx.restore();
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+// ============================================================
+// 9) 시작
+// ============================================================
+startBtn.addEventListener("click", startCamera);
+calibBtn.addEventListener("click", startCalibration);
+
+// 외부에서 경고 이벤트 구독 가능
+window.addEventListener("posture-warning", (e) => {
+  console.log("[posture-warning]", e.detail);
+});
+window.addEventListener("posture-recovered", () => {
+  console.log("[posture-recovered]");
+});
+window.addEventListener("eyes-closed", (e) => {
+  console.log("[eyes-closed]", e.detail);
+});
+window.addEventListener("eyes-opened", (e) => {
+  console.log("[eyes-opened]", e.detail);
+});
+window.addEventListener("distract-reset", (e) => {
+  console.log("[distract-reset]", e.detail);
+});
+
+initPose().catch((err) => {
+  console.error(err);
+  loadingEl.querySelector(".loading-text").textContent = "모델 로딩 실패";
+});
+</script>
+
+</body>
+</html>
